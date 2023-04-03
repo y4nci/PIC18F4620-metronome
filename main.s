@@ -22,21 +22,81 @@ CONFIG XINST = OFF      ; Extended Instruction Set Enable bit (Instruction set e
 
 ; GLOBAL SYMBOLS
 ; You need to add your variables here if you want to debug them.
-GLOBAL var1
+GLOBAL init_loop_inc1
+GLOBAL init_loop_inc2
+GLOBAL init_loop_inc3
+GLOBAL init_loop_inc4
+GLOBAL init_loop_container_inc
 
 ; Define space for the variables in RAM
 PSECT udata_acs
-var1:
-    DS 1 
+init_loop_inc1:
+    DS 1
+init_loop_inc2:
+    DS 1
+init_loop_inc3:
+    DS 1
+init_loop_inc4:
+    DS 1
+init_loop_container_inc:
+    DS 1
 
 PSECT resetVec,class=CODE,reloc=2
 resetVec:
     goto       main
 
 PSECT CODE
+
 main:
-  clrf var1 ; var1 = 0
-main_loop:
-  goto main_loop
+    call init
+    movlw 31
+    
+init:
+    movlw 11100000B ; lit up RA{0-1-2}
+    movwf LATA ; move WREG to LATA
+    movlw 8
+    movwf init_loop_container_inc
+
+    ; wait for 1000ms
+    call init_loop_container
+
+    return
+
+init_loop_container:
+    movlw 5 ; for setting inc{1-2-3-4} values
+    movwf init_loop_inc1
+    movwf init_loop_inc2
+    movwf init_loop_inc3
+    movwf init_loop_inc4
+    call init_loop1
+    call init_loop2
+    call init_loop3
+    call init_loop4
+    
+    infsnz init_loop_container_inc
+    return
+    goto init_loop_container
+    
+init_loop1:
+    infsnz init_loop_inc1
+    return
+    goto init_loop1
+
+init_loop2:
+    infsnz init_loop_inc2
+    return
+    goto init_loop2
+    
+init_loop3:
+    infsnz init_loop_inc3
+    return
+    goto init_loop3
+    
+init_loop4:
+    infsnz init_loop_inc4
+    return
+    goto init_loop4
+
+post_init_loop:
 
 end resetVec
