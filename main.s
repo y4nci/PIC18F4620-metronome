@@ -42,6 +42,7 @@ GLOBAL bar_len
 GLOBAL speed
 GLOBAL paused
 GLOBAL beat_num
+GLOBAL change_beat_num
 GLOBAL lights_should_be_on
     
 GLOBAL buff
@@ -87,6 +88,8 @@ paused:
     DS 1
 beat_num:
     DS 1
+change_beat_num:
+    DS 1
 lights_should_be_on:
     DS 1
     
@@ -100,6 +103,8 @@ resetVec:
     goto       main
 
 PSECT CODE
+ 
+goto main
 
 main:
     call init
@@ -266,13 +271,18 @@ toggle_lights_should_be_on:
 	
     turn_off:
 	clrf lights_should_be_on
+	btfss change_beat_num, 0
+	return
+	clrf beat_num
 	return
     
 lights_on:
-    movff beat_num, WREG
-    cpfseq bar_len  ; compare beat_num with bar_len
+    movff bar_len, WREG
+    
+    cpfslt beat_num  ; if (beat_num >= bar_len) call ondabeat
+    goto mustard_on_da_beat ; 
+    
     goto mustard_not_on_da_beat
-    goto mustard_on_da_beat ; if beat num == bar_len call on da beat
     return
     
     mustard_on_da_beat:
@@ -439,15 +449,12 @@ handle_click1:
     
 handle_click2:
     ; Reset bar length to 4.
-    clrf bar_len
-    incf bar_len
-    incf bar_len
-    incf bar_len
-    incf bar_len
+    movlw 4
+    movwf bar_len
     return
 handle_click3:
     ; Decrease bar length by 1.
-    decf bar_len
+    decf bar_len, 1
     return
 handle_click4:    
     ; Increase bar length by 1.
@@ -482,8 +489,8 @@ on_da_beat:
     cpfseq PREV_buff
     movff buff, PORTA
     movff buff, PREV_buff
-    movlw 0
-    movwf beat_num
+    movlw 1
+    movwf change_beat_num
     return
     
 not_on_da_beat:
@@ -493,6 +500,8 @@ not_on_da_beat:
     cpfseq PREV_buff
     movff buff, PORTA
     movff buff, PREV_buff
+    movlw 0
+    movwf change_beat_num
     return
     
 end resetVec
