@@ -206,9 +206,9 @@ reset_main_loop_inc2:
     return
     
 reset_main_loop_inc1:
-    movlw 5
+    movlw 11
     movwf main_loop_inc1
-    movlw 4
+    movlw 10
     movwf PREV_main_loop_inc1
     return
     
