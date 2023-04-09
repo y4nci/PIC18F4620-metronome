@@ -424,11 +424,32 @@ set_previous_click_state4_1:
 handle_click0:
     ; Pause/Resume metronome
     btfsc paused, 0
-    call continue_metronome
+    goto continue_metronome
     btfss paused, 0
-    call pause_metronome
+    goto pause_metronome
     return
     
+    continue_metronome:
+	clrf paused
+	; movlw 00000000B 
+	; movwf buff
+	; movff buff, WREG
+	; cpfseq PREV_buff
+	; movff buff, PORTA
+	; movff buff, PREV_buff
+	return
+
+    pause_metronome:
+	clrf paused
+	incf paused
+	movlw 00000100B
+	movwf buff
+	movff buff, WREG
+	cpfseq PREV_buff
+	movff buff, PORTA
+	movff buff, PREV_buff
+	return
+
 handle_click1:
     ; Switch between 2x and 1x speed.
     btfss speed, 0 ; if speed != 2x
@@ -459,27 +480,6 @@ handle_click3:
 handle_click4:    
     ; Increase bar length by 1.
     incf bar_len
-    return
-    
-continue_metronome:
-    clrf paused
-    ; movlw 00000000B 
-    ; movwf buff
-    ; movff buff, WREG
-    ; cpfseq PREV_buff
-    ; movff buff, PORTA
-    ; movff buff, PREV_buff
-    return
-    
-pause_metronome:
-    clrf paused
-    incf paused
-    movlw 00000100B
-    movwf buff
-    movff buff, WREG
-    cpfseq PREV_buff
-    movff buff, PORTA
-    movff buff, PREV_buff
     return
     
 on_da_beat:
